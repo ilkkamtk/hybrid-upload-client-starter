@@ -169,7 +169,7 @@ const checkToken = async (): Promise<void> => {
 // call checkToken on page load to check if token exists and update the DOM
 checkToken();
 
-// TODO: login form event listener
+// login form event listener
 // event listener should call login function and save token to local storage
 // then call addUserDataToDom to update the DOM with the user data
 if (loginForm) {
