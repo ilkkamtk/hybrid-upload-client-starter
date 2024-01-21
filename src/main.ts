@@ -1,5 +1,5 @@
 import {fetchData} from './functions';
-import {UserWithNoPassword} from '@sharedTypes/DBTypes';
+import {MediaItem, UserWithNoPassword} from '@sharedTypes/DBTypes';
 import {LoginResponse} from '@sharedTypes/MessageTypes';
 
 // select forms from the DOM
@@ -13,6 +13,9 @@ const passwordInput = document.querySelector('#password') as HTMLInputElement;
 // select profile elements from the DOM
 const usernameTarget = document.querySelector('#username-target');
 const emailTarget = document.querySelector('#email-target');
+
+// select media elements from the DOM
+const filesList = document.querySelector('#files-list');
 
 // TODO: function to login
 const login = async (): Promise<LoginResponse> => {
@@ -33,8 +36,12 @@ const login = async (): Promise<LoginResponse> => {
   return loginResponse;
 };
 
-// TODO: function to add userdata (email, username and avatar image) to the
-// Profile DOM and Edit Profile Form
+// TODO: function to upload a file
+
+// TODO funtion to post a file to the API
+
+// function to add userdata (email, username) to the
+// Profile DOM elements
 const addUserDataToDom = (user: UserWithNoPassword): void => {
   if (!usernameTarget || !emailTarget) {
     return;
@@ -43,14 +50,75 @@ const addUserDataToDom = (user: UserWithNoPassword): void => {
   emailTarget.textContent = user.email;
 };
 
-// function to get userdata from API using token
+// function to add file data (filename, mimetype) to the
+// Media DOM elements
+const addFilesToDom = async () => {
+  try {
+    if (!filesList) {
+      return;
+    }
+    filesList.innerHTML = '';
+
+    // grapql query to get all files (copy from sandbox)
+    const query = `
+      query MediaItems {
+        mediaItems {
+          filename
+          thumbnail
+          title
+        }
+      }
+    `;
+    const options = {
+      method: 'POST',
+      body: JSON.stringify({query}),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+    const fileItems = await fetchData<{data: {mediaItems: MediaItem[]}}>(
+      import.meta.env.VITE_MEDIA_SERVER,
+      options
+    );
+    console.log(fileItems);
+    // loop through files and add them to the DOM
+    fileItems.data.mediaItems.forEach((file: any) => {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      const img = document.createElement('img');
+      img.src = file.thumbnail;
+      img.alt = file.title;
+      td.appendChild(img);
+      tr.appendChild(td);
+      const td2 = document.createElement('td');
+      const a = document.createElement('a');
+      a.href = file.filename;
+      a.textContent = 'Open ' + file.title;
+      td2.appendChild(a);
+      tr.appendChild(td2);
+      filesList.appendChild(tr);
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+addFilesToDom();
+
+// TODO: function to get userdata from API using token
 const getUserData = async (token: string): Promise<UserWithNoPassword> => {
   return {} as UserWithNoPassword;
 };
 
-// TODO: function to check local storage for token and if it exists fetch
+// function to check local storage for token and if it exists fetch
 // userdata with getUserData then update the DOM with addUserDataToDom
-const checkToken = async (): Promise<void> => {};
+const checkToken = async (): Promise<void> => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    const user = await getUserData(token);
+    addUserDataToDom(user);
+  }
+};
 
 // call checkToken on page load to check if token exists and update the DOM
 checkToken();
@@ -73,6 +141,7 @@ if (loginForm) {
   });
 }
 
-// TODO: avatar form event listener
-// event listener should call uploadAvatar function and update the DOM with
-// the user data by calling addUserDataToDom or checkToken
+// TODO: file form event listener
+// event listener should call uploadFile function to upload the file
+// then call postFile function to post the file to the GraphQL API
+// then call addFileToDom to update the DOM with the file data
