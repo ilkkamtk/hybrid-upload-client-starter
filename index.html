@@ -16,7 +16,7 @@
 
 <body>
   <div class="container">
-    <h1>Vite PWA Example</h1>
+    <h1>GraphQL upload example</h1>
     <section id="login">
       <h2>Login</h2>
       <p>Login to get user data</p>
@@ -38,31 +38,15 @@
       <h2>Profile</h2>
       <p>Username: <span id="username-target"></span></p>
       <p>email: <span id="email-target"></span></p>
-      <img id="avatar-target" src="" alt="Avatar">
       <hr>
-      <h2>Edit profile</h2>
-      <form id="profile-form">
+      <h2>Upload file</h2>
+      <form id="file-form">
         <div class="form-control">
-          <input id="profile-username" type="text" name="username">
-          <label for="profile-username">Username</label>
+          <input id="file" type="file" name="file" accept="image/*,video/*">
+          <label for="file">Choose media file</label>
         </div>
         <div class="form-control">
-          <input id="profile-email" type="email" name="email">
-          <label for="profile-email">Email</label>
-        </div>
-        <div class="form-control">
-          <input type="submit" value="Update" class="button">
-        </div>
-      </form>
-      <hr>
-      <h2>Upload avatar</h2>
-      <form id="avatar-form">
-        <div class="form-control">
-          <input id="avatar" type="file" name="avatar">
-          <label for="avatar">Choose image</label>
-        </div>
-        <div class="form-control">
-          <input type="submit" value="Uppload" class="button">
+          <input type="submit" value="Upload" class="button">
         </div>
       </form>
     </section>
