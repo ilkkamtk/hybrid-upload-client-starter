@@ -19,21 +19,40 @@ const filesList = document.querySelector('#files-list');
 
 // TODO: function to login
 const login = async (): Promise<LoginResponse> => {
-  const username = usernameInput.value;
-  const password = passwordInput.value;
+  // grapql query to login (copy from sandbox)
+  const query = `
+    mutation Login($username: String!, $password: String!) {
+      login(username: $username, password: $password) {
+        token
+        message
+        user {
+          user_id
+          username
+          email
+          level_name
+          created_at
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    username: usernameInput.value,
+    password: passwordInput.value,
+  };
 
   const options = {
     method: 'POST',
-    body: JSON.stringify({username, password}),
+    body: JSON.stringify({query, variables}),
     headers: {
       'Content-Type': 'application/json',
     },
   };
-  const loginResponse = await fetchData<LoginResponse>(
-    import.meta.env.VITE_AUTH_SERVER + '/auth/login',
+  const loginResponse = await fetchData<{data: {login: LoginResponse}}>(
+    import.meta.env.VITE_GRAPHQL_SERVER,
     options
   );
-  return loginResponse;
+  return loginResponse.data.login;
 };
 
 // TODO: function to upload a file
@@ -77,7 +96,7 @@ const addFilesToDom = async () => {
       },
     };
     const fileItems = await fetchData<{data: {mediaItems: MediaItem[]}}>(
-      import.meta.env.VITE_MEDIA_SERVER,
+      import.meta.env.VITE_GRAPHQL_SERVER,
       options
     );
     console.log(fileItems);
@@ -107,7 +126,30 @@ addFilesToDom();
 
 // TODO: function to get userdata from API using token
 const getUserData = async (token: string): Promise<UserWithNoPassword> => {
-  return {} as UserWithNoPassword;
+  const query = `
+      query CheckToken {
+        checkToken {
+          user_id
+          username
+          email
+          level_name
+          created_at
+        }
+      }
+    `;
+  const options = {
+    method: 'POST',
+    body: JSON.stringify({query}),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token,
+    },
+  };
+  const user = await fetchData<{data: {checkToken: UserWithNoPassword}}>(
+    import.meta.env.VITE_GRAPHQL_SERVER,
+    options
+  );
+  return user.data.checkToken;
 };
 
 // function to check local storage for token and if it exists fetch
@@ -115,8 +157,12 @@ const getUserData = async (token: string): Promise<UserWithNoPassword> => {
 const checkToken = async (): Promise<void> => {
   const token = localStorage.getItem('token');
   if (token) {
-    const user = await getUserData(token);
-    addUserDataToDom(user);
+    try {
+      const user = await getUserData(token);
+      addUserDataToDom(user);
+    } catch (error) {
+      console.log(error);
+    }
   }
 };
 
