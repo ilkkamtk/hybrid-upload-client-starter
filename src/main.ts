@@ -67,6 +67,7 @@ if (loginForm) {
       addUserDataToDom(loginResponse.user);
       alert(loginResponse.message);
     } catch (error) {
+      console.log(error);
       alert((error as Error).message);
     }
   });
