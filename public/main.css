@@ -23,6 +23,16 @@ input {
   box-sizing: border-box;
 }
 
+textarea {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
 .button {
   display: block;
   width: 100%;
